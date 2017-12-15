@@ -6,9 +6,10 @@ df = pd.read_csv('data.csv')
 #seperating target from data
 X=df.drop('y', axis = 1)
 X=X.drop(X.columns[0],axis = 1)
-y=df['y']
+y_before_bin=df['y']
 
-y.replace([2,3,4,5],0, inplace=True)
+y=y_before_bin.replace([2,3,4,5],0)
+print(y)
 
 
 
