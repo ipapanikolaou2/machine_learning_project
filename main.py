@@ -8,7 +8,8 @@ X=df.drop('y', axis = 1)
 X=X.drop(X.columns[0],axis = 1)
 y=df['y']
 
-#TODO change y values
+y.replace([2,3,4,5],0, inplace=True)
+
 
 
 #TODO do nnc with split
