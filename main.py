@@ -30,6 +30,7 @@ from sklearn.metrics import accuracy_score
 # subsetting just the odd ones
 neighbors = [1,3,5,7,9]
 
+
 # empty list that will hold cv scores
 cv_scores = []
 
