@@ -56,7 +56,6 @@ print(accuracy_score(y_test, pred))
 #TODO change the range to a bigger number before we send it to berbe
 neighbors = range(1, 50, 2)
 
-
 # empty list that will hold cv scores
 cv_scores_mean = []
 cv_scores = []
