@@ -23,8 +23,6 @@ y_before_bin=df['y']
 #binarizing the target data
 y = y_before_bin.replace([2, 3, 4, 5], 0)
 
-
-
 #splitting the data into training and testing data
 
 #spliting_data
