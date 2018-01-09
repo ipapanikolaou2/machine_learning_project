@@ -1,13 +1,11 @@
 
 import pandas as pd
-from numpy import mean
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
-from sklearn.pipeline import Pipeline
+from sklearn.neural_network import MLPClassifier
 from sklearn import decomposition
 from sklearn.preprocessing import StandardScaler
 
@@ -20,7 +18,7 @@ df = pd.read_csv('data.csv')
 
 #seperating target from data
 X=df.drop('y', axis=1)
-X=X.drop(X.columns[0], axis=1) # the first column is irrelevant
+X=X.drop(X.columns[0], axis=1)  # the first column is irrelevant
 y_before_bin=df['y']
 #binarizing the target data
 y = y_before_bin.replace([2, 3, 4, 5], 0)
@@ -33,12 +31,10 @@ X = scaler.transform(X)
 
 #splitting the data into training and testing data
 
-#spliting_data
 X_train, X_test, y_train, y_test = train_test_split(X,y)
 
 #TODO do nnc with split
 
-"""
 #TODO knn with split
 # ----------Performing KNN algorithm for k=3 and testing the algorithm on the test data-----------
 
@@ -49,9 +45,10 @@ knn.fit(X_train,y_train)
 pred = knn.predict(X_test)
 
 # evaluate accuracy
+print('---------knn classification report for k = 3--------------')
 print(classification_report(y_test, pred))
+print('---------knn confusion matrix report for k = 3--------------')
 print(confusion_matrix(y_test,pred))
-
 
 
 # --------Determining the most effective number of neighbours while performing cross validation----------
@@ -60,9 +57,7 @@ print(confusion_matrix(y_test,pred))
 #TODO change the range to a bigger number before we send it to berbe
 neighbors = range(1, 30, 6)
 
-
-
-# empty list that will hold cv scores
+# empty list that will hold cv scores (means and analytical cross validation scores)
 cv_scores_mean = []
 cv_scores = []
 # perform accuracy testing
@@ -76,6 +71,7 @@ for k in neighbors:
 # determining best k
 max_cv_score_index = cv_scores_mean.index(max(cv_scores_mean))
 optimal_k = neighbors[max_cv_score_index]
+# obtaining cross validation scores
 optimal_cv_scores= cv_scores[max_cv_score_index]
 print("The optimal number of neighbors for knn classification is %d" % optimal_k)
 
@@ -99,54 +95,61 @@ plt.close(plot2)
 
 
 
-
 #TODO nnc cross validation
 #TODO knn cross validations
 
 
-# --------performing cross validation for knn on all the data---------------
-knn=KNeighborsClassifier(n_neighbors=1)
-cross_score = cross_val_score(knn, X, y, cv=10, scoring='accuracy')
-plot2 = plt.figure(2)
-plt.plot(cross_score)
-plt.xlabel('folds')
-plt.ylabel('accuracy')
-
-plt.title('The mean cross validation score for the knn algorithm is '+str(mean(cross_score)))
-plot2.savefig("cross_validation_for_knn.png")
-plt.close(plot2)
-"""
 
 
 
-#TODO PCA nnc
+# TODO PCA nnc
 
-#TODO PCA for knn
+# TODO PCA for knn
 
+# creating array of possible principal components
+i = [ 20, 40, 60, 80, 100, 120, 140, 160]
+# creating empty arrays to fill with the cross validation scores
+scores_knn_after_pca = []
+scores_mlp_after_pca = []
+# knn algorithm with optimal k
+knn = KNeighborsClassifier(n_neighbors=optimal_k)
+# TODO change as variable
+mlp = MLPClassifier(120)
+# applying PCA for each possible number of principal components and performing cross validation
+for components in i:
+    # PCA with i principal components
+    pca = decomposition.PCA(components)
+    pca.fit(X)
+    X_pca = pca.transform(X)
 
-rows, columns = X.shape
-search_space=[{'pca__n_components': [columns-15,columns-30,columns-45, columns-60, columns-75, columns - 90]}]
-knn=KNeighborsClassifier(n_neighbors=1)
-pca=decomposition.PCA()
-pca.fit(X)
+    # cross validation for knn and saving the mean score of cross validation
+    knn_scores=(cross_val_score(knn,X_pca,y, cv=10, scoring='accuracy')).mean()
+    scores_knn_after_pca.append(knn_scores)
 
+    # cross validation for mlp and saving the mean score of cross validation
+    mlp_scores=(cross_val_score(mlp,X_pca,y,cv=10, scoring='accuracy')).mean()
+    scores_mlp_after_pca.append(mlp_scores)
 
-
-pipe= Pipeline(steps=[('pca',pca),('knn',knn)])
-
-estimator = GridSearchCV(pipe, search_space, cv=10, refit=True, verbose=3)
-estimator.fit(X, y)
-
-plot3=plt.figure(3)
-plt.axes([.2, .2, .7, .7])
-plt.plot(pca.explained_variance_, linewidth=2)
-plt.axis('tight')
+# plotting cross validation scores while showing the optimal number of components for knn algorithm
+plot3 = plt.figure(3)
+plt.title('cross validation of knn for each number of principal components \n optimal components = '+str(i[scores_knn_after_pca.index(max(scores_knn_after_pca))]))
+plt.plot(i,scores_knn_after_pca)
 plt.xlabel('n_components')
-plt.ylabel('explained_variance_')
-plt.axvline(estimator.best_estimator_.named_steps['pca'].n_components,linestyle=':', label='n_components chosen')
-plt.legend(prop=dict(size=12))
-plt.show()
-print('Best Number Of Principal Components:', estimator.best_estimator_.get_params())
+plt.ylabel('accuracy')
+plt.axvline(x=i[scores_knn_after_pca.index(max(scores_knn_after_pca))], linestyle='--')
+
+plt.savefig("cross validation of knn for each number of principal components")
+plt.close(plot3)
+
+# plotting cross validation scores while showing the optimal number of components for mlp algorithm
+plot4 = plt.figure(4)
+plt.title('cross validation of mlp for each number of principal components  \n optimal components = '+str(i[scores_mlp_after_pca.index(max(scores_mlp_after_pca))]))
+plt.plot(i,scores_mlp_after_pca)
+plt.xlabel('n_components')
+plt.ylabel('accuracy')
+plt.axvline(x=i[scores_mlp_after_pca.index(max(scores_mlp_after_pca))], linestyle='--')
+plt.savefig("cross validation of mlp for each number of principal components")
+plt.close(plot4)
 
 
 #TODO nnc cross validation 2
