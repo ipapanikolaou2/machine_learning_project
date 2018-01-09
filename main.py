@@ -27,8 +27,6 @@ scaler = StandardScaler()
 scaler.fit(X)
 X = scaler.transform(X)
 
-
-
 #splitting the data into training and testing data
 
 X_train, X_test, y_train, y_test = train_test_split(X,y)
