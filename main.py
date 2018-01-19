@@ -72,7 +72,7 @@ for k in neighbors:
     knn = KNeighborsClassifier(n_neighbors=k)
 
     # k-fold cross validating the train data
-    scores = cross_val_score(knn, X_train, y_train, cv=10, scoring='accuracy')
+    scores = cross_val_score(knn, X, y, cv=10, scoring='accuracy')
     cv_scores_mean.append(scores.mean())
     cv_scores.append(scores)
 # determining best k
@@ -94,13 +94,13 @@ plt.title('The optimal k for KNN algorithm is '+str(optimal_k))
 plt.show()
 plt.close(plot1)
 
-#plot cross validation for optimal k
-plot2 = plt.figure(2)
-plt.plot(optimal_cv_scores)
-plt.title('The mean of cross validation scores for optimal k = '+str(optimal_k)+' is '+str(cv_scores_mean[max_cv_score_index]))
-plt.savefig("Cross_Validation_Scores_for_Optimal_k")
-plt.show()
-plt.close(plot2)
+# #plot cross validation for optimal k
+# plot2 = plt.figure(2)
+# plt.plot(optimal_cv_scores)
+# plt.title('The mean of cross validation scores for optimal k = '+str(optimal_k)+' is '+str(cv_scores_mean[max_cv_score_index]))
+# plt.savefig("Cross_Validation_Scores_for_Optimal_k")
+# plt.show()
+# plt.close(plot2)
 
 
 
@@ -108,19 +108,19 @@ plt.close(plot2)
 
 neurons = [ 20, 70, 120, 170]
 gs_mlp = GridSearchCV(MLPClassifier(solver='sgd',max_iter=700), param_grid={'hidden_layer_sizes':neurons},refit=True,verbose=3,cv=10)
-gs_mlp.fit(X_train,y_train)
+gs_mlp.fit(X,y)
 
 # plot accuracy vs hyperparameter
 
 results_mlp=gs_mlp.cv_results_
-plot3=plt.figure(3)
+plot2=plt.figure(2)
 plt.title("GridsearchCV cross-valdiation")
 plt.xlabel("number of neurons in the hidden layer")
 plt.ylabel("Score")
 plt.plot(neurons,results_mlp['mean_test_score'].data)
 plt.savefig("Cross_Validation_Scores_for_hyperparameter_neurons")
 plt.show()
-plt.close(plot3)
+plt.close(plot2)
 
 # determining best number of neurons from gridsearchcv results
 
@@ -128,7 +128,7 @@ optimal_hyper_parameter = gs_mlp.best_params_['hidden_layer_sizes']
 print('the best number of neurons is: ',optimal_hyper_parameter,', with mean score: ',gs_mlp.best_score_)
 
 #evaluating accuracy
-
+#TODO maybe does not make sense to print confusion matrix and classification report with this data
 gs_mlp_predictions = gs_mlp.predict(X_test)
 print('---------mlp classification report after cross validation for the best hyperparameter:',optimal_hyper_parameter,'-------------- \n')
 print(confusion_matrix(y_test,gs_mlp_predictions))
@@ -139,7 +139,7 @@ print(classification_report(y_test,gs_mlp_predictions))
 #Principal Component Analysis
 
 # creating array of possible principal components
-i = [ 20, 40, 60, 80, 100, 120, 140, 160]
+i = [2, 5, 20, 40, 60, 80, 100, 120, 140, 160]
 # creating empty arrays to fill with the cross validation scores
 scores_knn_after_pca = []
 scores_mlp_after_pca = []
@@ -163,7 +163,7 @@ for components in i:
     scores_mlp_after_pca.append(mlp_scores)
 
 # plotting cross validation scores while showing the optimal number of components for knn algorithm
-plot4 = plt.figure(4)
+plot3 = plt.figure(3)
 plt.title('cross validation of knn for each number of principal components \n optimal components = '+str(i[scores_knn_after_pca.index(max(scores_knn_after_pca))]))
 plt.plot(i,scores_knn_after_pca)
 plt.xlabel('n_components')
@@ -171,10 +171,10 @@ plt.ylabel('accuracy')
 plt.axvline(x=i[scores_knn_after_pca.index(max(scores_knn_after_pca))], linestyle='--')
 plt.savefig("cross validation of knn for each number of principal components")
 plt.show()
-plt.close(plot4)
+plt.close(plot3)
 
 # plotting cross validation scores while showing the optimal number of components for mlp algorithm
-plot5 = plt.figure(5)
+plot4 = plt.figure(4)
 plt.title('cross validation of mlp for each number of principal components  \n optimal components = '+str(i[scores_mlp_after_pca.index(max(scores_mlp_after_pca))]))
 plt.plot(i,scores_mlp_after_pca)
 plt.xlabel('n_components')
@@ -182,7 +182,7 @@ plt.ylabel('accuracy')
 plt.axvline(x=i[scores_mlp_after_pca.index(max(scores_mlp_after_pca))], linestyle='--')
 plt.savefig("cross validation of mlp for each number of principal components")
 plt.show()
-plt.close(plot5)
+plt.close(plot4)
 
 
 #TODO nnc cross validation 2
