@@ -61,12 +61,10 @@ print('\n')
 # --------Determining the most effective number of neighbours while performing cross validation----------
 
 # range of possible number of neighbours. They must me odd
-#TODO change the range to a bigger number before we send it to berbe
-neighbors = range(1, 30, 6)
+neighbors = range(1, 30, 4)
 
 # empty list that will hold cv scores (means and analytical cross validation scores)
 cv_scores_mean = []
-cv_scores = []
 # perform accuracy testing
 for k in neighbors:
     knn = KNeighborsClassifier(n_neighbors=k)
@@ -74,12 +72,10 @@ for k in neighbors:
     # k-fold cross validating the train data
     scores = cross_val_score(knn, X, y, cv=10, scoring='accuracy')
     cv_scores_mean.append(scores.mean())
-    cv_scores.append(scores)
 # determining best k
 max_cv_score_index = cv_scores_mean.index(max(cv_scores_mean))
 optimal_k = neighbors[max_cv_score_index]
 # obtaining cross validation scores
-optimal_cv_scores= cv_scores[max_cv_score_index]
 print("The optimal number of neighbors for knn classification is %d" % optimal_k)
 print('\n')
 
@@ -93,16 +89,6 @@ plot1.savefig("determining_k_for_knn.png")
 plt.title('The optimal k for KNN algorithm is '+str(optimal_k))
 plt.show()
 plt.close(plot1)
-
-# #plot cross validation for optimal k
-# plot2 = plt.figure(2)
-# plt.plot(optimal_cv_scores)
-# plt.title('The mean of cross validation scores for optimal k = '+str(optimal_k)+' is '+str(cv_scores_mean[max_cv_score_index]))
-# plt.savefig("Cross_Validation_Scores_for_Optimal_k")
-# plt.show()
-# plt.close(plot2)
-
-
 
 #performing 10-fold cross validation for MLP and using the number of neurons as hyperparameter with one hidden layer
 
@@ -119,7 +105,6 @@ plt.xlabel("number of neurons in the hidden layer")
 plt.ylabel("Score")
 plt.plot(neurons,results_mlp['mean_test_score'].data)
 plt.savefig("Cross_Validation_Scores_for_hyperparameter_neurons")
-plt.show()
 plt.close(plot2)
 
 # determining best number of neurons from gridsearchcv results
@@ -127,13 +112,6 @@ plt.close(plot2)
 optimal_hyper_parameter = gs_mlp.best_params_['hidden_layer_sizes']
 print('the best number of neurons is: ',optimal_hyper_parameter,', with mean score: ',gs_mlp.best_score_)
 
-#evaluating accuracy
-#TODO maybe does not make sense to print confusion matrix and classification report with this data
-gs_mlp_predictions = gs_mlp.predict(X_test)
-print('---------mlp classification report after cross validation for the best hyperparameter:',optimal_hyper_parameter,'-------------- \n')
-print(confusion_matrix(y_test,gs_mlp_predictions))
-print('---------mlp confusion matrix report after cross validation for the best hyperparameter:',optimal_hyper_parameter,'-------------- \n')
-print(classification_report(y_test,gs_mlp_predictions))
 
 
 #Principal Component Analysis
@@ -170,7 +148,6 @@ plt.xlabel('n_components')
 plt.ylabel('accuracy')
 plt.axvline(x=i[scores_knn_after_pca.index(max(scores_knn_after_pca))], linestyle='--')
 plt.savefig("cross validation of knn for each number of principal components")
-plt.show()
 plt.close(plot3)
 
 # plotting cross validation scores while showing the optimal number of components for mlp algorithm
@@ -181,11 +158,4 @@ plt.xlabel('n_components')
 plt.ylabel('accuracy')
 plt.axvline(x=i[scores_mlp_after_pca.index(max(scores_mlp_after_pca))], linestyle='--')
 plt.savefig("cross validation of mlp for each number of principal components")
-plt.show()
 plt.close(plot4)
-
-
-#TODO nnc cross validation 2
-#TODO knn cross validation 2
-
-#TODO PUT COMMENTS!!
