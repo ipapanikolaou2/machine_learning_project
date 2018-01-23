@@ -87,7 +87,6 @@ plt.xlabel('Number of Neighbors K')
 plt.ylabel('Accuracy')
 plot1.savefig("determining_k_for_knn.png")
 plt.title('The optimal k for KNN algorithm is '+str(optimal_k))
-plt.show()
 plt.close(plot1)
 
 #performing 10-fold cross validation for MLP and using the number of neurons as hyperparameter with one hidden layer
